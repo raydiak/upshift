@@ -1,0 +1,16 @@
+#!/usr/bin/env perl6
+
+use lib $?FILE.IO.parent.parent.child: 'lib';
+use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
+
+use Upshift;
+
+sub MAIN (Str $project, Str $destination?) {
+    if $destination.defined {
+        Upshift::build $project, $destination;
+    } else {
+        Upshift::build $project;
+    }
+}
+
+# vim: ft=perl6

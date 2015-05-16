@@ -1,0 +1,138 @@
+Upshift is an experimental templating system in Perl 6. It may become more in
+the future, but for now it is simply a templating system. Some of the goals in
+mind surrounding the existing work to varying degrees are:
+
+- Simple syntax; attempt to require as little as possible in the way of
+  memorization and comprehension of the semantics of Upshift, Perl, parsers,
+  programming in general, etc. Thus it uses a DSL.
+
+- Be able to template Perl, HTML, CSS, JavaScript, XML, JSON, and hopefully,
+  generally "whatever", with a minimal amount of escaping required in as many
+  cases as possible. Thus the only character which must be escaped is the
+  carrot ("^"), which introduces all non-literal constructs.
+
+- Build the next version of my website with it. Thus there are ways to have a
+  single file which defines multiple inserts for head, title, body, etc. This
+  means many other things as well, but the metavalue is "it will be somewhat
+  pre-tested to be sanely productive for some subset of web uses". Note this
+  does *not* mean that Upshift is intended for web uses only, or even
+  primarily, but it is definitely designed with them in mind.
+
+- Allow large definition libraries while only loading and parsing the parts
+  which are used. Also, don't require tedious predeclarations. Thus named
+  symbols are loaded lazily and templates are parsed one time only as needed,
+  then cached and simply re-paramaterized for each instantiation.
+
+
+
+Processing is accomplished by calling the "upshift" script with the path to the
+project's root directory. An optional second parameter will override gen/ as
+the destination for output.
+
+> upshift example
+    # process example/
+
+> upshift example foo
+    # process example/ into foo/ instead of example/gen/
+
+Projects are comprised of templates and non-template files separated into
+subdirectories according to their role in the project's processing and output.
+The final resulting file structure goes in gen/ which will be deleted if it
+already exists. Generation is done by copying the contents of inc/ into gen/
+and then processing the contents of src/ as template files, loading symbol
+names from all directories as needed, and writing each result into gen/ under
+the same file name.
+
+gen/    - where the output goes
+src/    - where the input comes from; each template processed into gen
+inc/    - copied into gen without processing
+lib/    - templates available to use by name but not processed into gen
+res/    - raw non-template files available by name but not included in gen
+
+
+
+The syntax is as follows:
+
+- All text is parsed as plain literal characters until a ^ is encountered.
+
+- ^^ represents a single literal '^' character.
+
+- Within any ^ sequence, even an escaped escape or quote, whitespace is
+  optional in most places except between literals. Put another way, places
+  where you might, in other languages, be used to putting a comma after a term
+  or a required space or punctuation after a keyword, are required whitespace
+  in Upshift, and other whitespace around Upshift-syntactic characters like ^,
+  ?, !, ; is valid, optional, and ignored. Whitespace outside of an Upshift
+  expression or inside of a quote/upquote is always taken literally.
+
+- The final closing marker in most Upshift escapes and literals may be omitted
+  at the end of the file. See example/src/index.html for an example. This
+  includes (but may not be limited to) the terminating ; of an Upshift
+  statement as well as any closing quote or upquote of a literal within a
+  statement. Multiple such delimiters may be omitted as long as they all fall
+  at the end of the file. The aforementioned example omits both the ^' at the
+  end of the 'body' value, and the ; at the end of the 'page' insertion which
+  comprises the whole file.
+
+- Names are currently looked up in a rather static way, first as parameters
+  passed in from an insertion call, then from the root of src, lib, inc, and
+  res in that order, stopping at the first defined value it finds. No name
+  mangling is applied, so for example to refer to a template file named
+  "lib/site/nav.html" the corresponding name would be "site/nav.html".
+
+Insertion of vars/params/templates/files:
+
+    ^name;
+        - Inserts the value of the symbol "name"
+
+    ^name param val;
+        - Inserts the value of the symbol name, passing it a parameter named
+          "param" with the value "val"
+        - Name is a bare unquoted literal only; param and value are any literal
+          or a nested Upshift statement, though the param name might not always
+          work as an Upshift statement yet
+
+Conditionals:
+
+    ^?name bar;
+        - Inserts bar if the symbol "name"'s value is not ''
+        - Name must be a bare literal as in insertion (described previously)
+
+    ^?name foo bar;
+        - Inserts bar if the symbol "name"'s value is "foo"
+
+    ^?name foo foo ! bar bar ! ^name; ;
+        - If name's value is "foo", insert literal "foo"; else if name is bar,
+          insert "bar", else insert the value of the "name" symbol
+
+Upshift Literals (inside ^ statements, above):
+
+    foo
+        - Bare unquoted literal, only letters, numbers, and underscores allowed
+        - Required form in certain places like the name in an insertion call
+
+    'foo' (or "foo")
+        - Quoted, allows whitespace and other special characters
+        - ^' escapes a quote to insert a "'" in a quoted string
+        - ^^ escapes a ^
+        - Any other ^ is invalid, and any other ' ends the literal
+        - The rules for double quotes ("") are the same as single quotes, they
+          don't indicate any special processing or interpolation as in some
+          other languages like Perl; use upquotes (below) for that
+
+    ^'foo^' (or ^"foo^")
+        - Inserts a subdefinition in the same format as a standalone template
+        - We call this "upquoted"
+        - Same escaping rules as the mainline/top level of the template
+        - As with normal quotes (above), single and double quotes are
+          semantically identical
+
+
+
+There are no major known bugs at this time, arguably other than a lack of
+several desirable features and adequate test coverage and documentation. Issues
+may be reported to the contact information below.
+
+https://github.com/raydiak/upshift
+raydiak@cyberuniverses.com
+raydiak on #perl6 on irc.freenode.net

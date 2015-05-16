@@ -1,0 +1,17 @@
+{
+    "name"          : "Upshift",
+    "version"       : "*",
+    "description"   : "General-purpose templating system in Perl 6",
+    "author"        : "raydiak",
+    "build-depends" : [  ],
+    "test-depends"  : [ "Test" ],
+    "depends"       : [ "File::Find", "Shell::Command" ],
+    "provides"      : {
+        "Upshift"                       : "lib/Upshift.pm",
+        "Upshift::Definition"           : "lib/Upshift/Definition.pm",
+        "Upshift::Language"             : "lib/Upshift/Language.pm",
+        "Upshift::Language::Upshift"    : "lib/Upshift/Language/Upshift.pm",
+        "Upshift::Project"              : "lib/Upshift/Project.pm"
+    },
+    "source-url"    : "git://github.com/raydiak/upshift.git"
+}

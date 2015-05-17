@@ -1,4 +1,4 @@
-role Upshift::Language[Grammar $grammar, Any $actions];
+unit role Upshift::Language[Grammar $grammar, Any $actions];
 
 method grammar { $grammar }
 method actions { $actions }

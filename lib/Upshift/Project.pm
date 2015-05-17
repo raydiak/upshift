@@ -1,4 +1,4 @@
-class Upshift::Project;
+unit class Upshift::Project;
 
 use File::Find;
 use Shell::Command;

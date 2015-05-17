@@ -1,4 +1,4 @@
-module Upshift;
+unit module Upshift;
 
 use Upshift::Project;
 

@@ -1,4 +1,4 @@
-class Upshift::Definition;
+unit class Upshift::Definition;
 
 has @.children;
 

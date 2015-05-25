@@ -53,8 +53,14 @@ method !load ($name) {
 }
 
 submethod BUILD (:$path?, :$gen-path?) {
-    $!path = $path.IO if $path.defined;
-    $!gen-path = $gen-path.IO if $gen-path.defined;
+    if $path.defined {
+        die 'The empty string is not allowed as a path (Upshift::Project.path); use "." to represent the current directory, or an undefined value to use the default' if $path eq '';
+        $!path = $path.IO;
+    }
+    if $gen-path.defined {
+        die 'The empty string is not allowed as a path (Upshift::Project.gen-path); use "." to represent the current directory, or an undefined value to use the default, and take special care with the gen-path as its existing contents will be entirely erased' if $gen-path eq '';
+        $!gen-path = $gen-path.IO;
+    }
 }
 
 method build () {

@@ -59,7 +59,7 @@ grammar Upshift::Language::Upshift::Grammar {
             also, making this work seems mutually exclusive with symbol (above)
             starting to need tests ]]]
     }
-    token escape-literal-bare { \w+ }
+    token escape-literal-bare { <[ \w \- \/ \\ \. ]>+ }
     token escape-literal-quoted {
         \' (
             <escape-literal-quoted-literal> ||

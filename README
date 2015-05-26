@@ -30,10 +30,10 @@ project's root directory. An optional second parameter will override gen/ as
 the destination for output.
 
 > upshift example
-    # process example/
+    # process ./example into ./example/gen
 
 > upshift example foo
-    # process example/ into foo/ instead of example/gen/
+    # process ./example into ./foo
 
 Projects are comprised of templates and non-template files separated into
 subdirectories according to their role in the project's processing and output.
@@ -108,8 +108,9 @@ Conditionals:
 Upshift Literals (inside ^ statements, above):
 
     foo
-        - Bare unquoted literal, only letters, numbers, and underscores allowed
+        - Bare unquoted literal
         - Required form in certain places like the name in an insertion call
+        - All letters and numbers are allowed as well as . / \ - and _
 
     'foo' (or "foo")
         - Quoted, allows whitespace and other special characters

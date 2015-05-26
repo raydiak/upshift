@@ -86,18 +86,18 @@ grammar Upshift::Language::Upshift::Grammar {
 }
 
 class Upshift::Language::Upshift::Actions {
-    use Upshift::Definition;
+    use Upshift::Language::Upshift::Definition;
 
     has @.cond-names;
 
-    method TOP ($/) { make Upshift::Definition.new: :children($0».values».made) }
+    method TOP ($/) { make Upshift::Language::Upshift::Definition.new: :children($0».values».made) }
     method literal ($/) { make join '', $0».values».made }
     method literal-normal ($/) { make ~$/ }
     method literal-escape ($/) { make '^' }
     method escape ($/) { make $/.values[0].made }
     method escape-statement ($/) { make $/.values[0].made }
     method escape-statement-call ($/) {
-        make Upshift::Definition.new: :call, :children(
+        make Upshift::Language::Upshift::Definition.new: :call, :children(
             $<name>.made,
             @($<param>».made)
         )
@@ -114,7 +114,7 @@ class Upshift::Language::Upshift::Actions {
             }),
             $<escape-statement-conditional-else><literal>.?made // ();
         
-        make Upshift::Definition.new: :conditional, :@children;
+        make Upshift::Language::Upshift::Definition.new: :conditional, :@children;
     }
     method escape-literal ($/) { make $/.values[0].made }
     method escape-literal-bare ($/) { make ~$/ }
@@ -129,7 +129,7 @@ class Upshift::Language::Upshift::Actions {
     method escape-literal-upquoted ($/) { make $<TOP>.made }
     method escape-literal-updoublequoted ($/) { make $<TOP>.made }
     method escape-literal-symbol ($/) {
-        make Upshift::Definition.new: :call,
+        make Upshift::Language::Upshift::Definition.new: :call,
             children => $<escape-literal-bare>.made;
     }
 }

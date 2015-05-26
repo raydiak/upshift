@@ -2,9 +2,12 @@ unit role Upshift::Language[Grammar $grammar, Any $actions];
 
 method grammar { $grammar }
 method actions { $actions }
-method read (Str:D $str) {
+method from-file (IO::Path:D $file) {
+    self.from-string: $file.slurp.chomp;
+}
+method from-string (Str:D $str) {
     $grammar.parse($str, actions => $actions.new).?made //
-    die "Parse failed";
+        die "Parse failed";
 }
 
 # vim: ft=perl6

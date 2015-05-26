@@ -40,12 +40,11 @@ method !load ($name) {
     for <src lib inc res> {
         my @files := self."$_\-files"();
         if $name ~~ @files».Str.any {
-            self.log: "Reading $_/$name";
             if $_ ~~ <src lib>.any {
-                my $str = self."$_\-path"().child($name).slurp.chomp;
-                self.log: "Parsing $name";
-                return $.in-lang.read: $str;
+                self.log: "Reading and parsing $name";
+                return $.in-lang.from-file: self."$_\-path"().child($name);
             }
+            self.log: "Reading $_/$name";
             return self."$_\-path"().child($name).slurp.chomp;
         }
     }
@@ -77,15 +76,16 @@ method build () {
     my &lookup = -> $_ { self.name: $_ };
     for @!src-files {
         self.log: "Generating $_";
-        my $def = self.name: $_;
+        my $obj = self.name: $_;
         my $dest-path = $.gen-path.child: $_;
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
-        my $out = $def.reduce: &lookup;
-        die "Error reducing $_" unless $out ~~ Str;
-        $out ~= "\n" unless $out.ends-with: "\n";
+        unless $obj ~~ Str {
+            $obj .= build: &lookup;
+            die "Error building $_" unless $obj ~~ Str;
+        }
         self.log: "Writing $dest-path.relative($.path)";
-        $dest-path.spurt: $out;
+        $dest-path.spurt: $obj;
     }
 }
 

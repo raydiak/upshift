@@ -1,4 +1,4 @@
-unit class Upshift::Definition;
+unit class Upshift::Language::Upshift::Definition;
 
 has @.children;
 
@@ -18,8 +18,8 @@ method gist {
     @.children.map( "\n" ~ *.gist.indent: 4 ).join
 }
 
-method reduce (&lookup) {
-    when !@.children { '' }
+method build (&lookup) {
+    when !@.children { "\n" }
     when ?$.call {
         my &new-lookup = %.params ??
             -> $_ {
@@ -33,7 +33,7 @@ method reduce (&lookup) {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';
         }
-        reduce-part $part, &new-lookup;
+        build-part $part, &new-lookup;
     }
 
     when ?$.conditional {
@@ -42,16 +42,16 @@ method reduce (&lookup) {
             #note " * Assuming empty string for undefined name '@.children[0]'";
             $cond-val = '';
         }
-        $cond-val = reduce-part $cond-val, &lookup;
+        $cond-val = build-part $cond-val, &lookup;
 
         my $i = @.conditions.first: -> $i { $cond-val ~~ @.children[$i] };
-        when $i.defined { reduce-part @.children[$i+1], &lookup }
-        when ?$.has-else { reduce-part @.children[*-1], &lookup }
+        when $i.defined { build-part @.children[$i+1], &lookup }
+        when ?$.has-else { build-part @.children[*-1], &lookup }
         '';
     }
     
     my @new;
-    for @.children.map({ reduce-part $_, &lookup }) {
+    for @.children.map({ build-part $_, &lookup }) {
         if $_ ~~ Str && @new && @new[*-1] ~~ Str {
             @new[*-1] ~= $_;
         } else {
@@ -59,12 +59,16 @@ method reduce (&lookup) {
         }
     }
     
-    when @new == 1 && @new[0] ~~ Str { @new[0] }
+    when @new == 1 && @new[0] ~~ Str {
+        my $out = @new[0];
+        $out ~= "\n" unless $out.ends-with: "\n";
+        $out;
+    }
 
     self.new: :children(@new);
 }
 
-multi sub reduce-part (::?CLASS $p, &lookup) { $p.reduce: &lookup }
-multi sub reduce-part ($p, &lookup?) { ~$p }
+multi sub build-part (::?CLASS $p, &lookup) { $p.build: &lookup }
+multi sub build-part ($p, &lookup?) { ~$p }
 
 # vim: ft=perl6

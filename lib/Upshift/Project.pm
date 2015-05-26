@@ -42,11 +42,11 @@ method !load ($name) {
         if $name ~~ @files».Str.any {
             self.log: "Reading $_/$name";
             if $_ ~~ <src lib>.any {
-                my $str = self."$_\-path"().child($name).slurp;
+                my $str = self."$_\-path"().child($name).slurp.chomp;
                 self.log: "Parsing $name";
-                return $.in-lang.read: $str.chomp;
+                return $.in-lang.read: $str;
             }
-            return self."$_\-path"().child($name).slurp;
+            return self."$_\-path"().child($name).slurp.chomp;
         }
     }
     return Any;

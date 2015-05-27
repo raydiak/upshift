@@ -1,5 +1,4 @@
-Upshift is an experimental templating system in Perl 6. It may become more in
-the future, but for now it is simply a templating system. Some of the goals in
+Upshift is an experimental templating system in Perl 6. Some of the goals in
 mind surrounding the existing work to varying degrees are:
 
 - Simple syntax; attempt to require as little as possible in the way of

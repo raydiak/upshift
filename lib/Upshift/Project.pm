@@ -26,7 +26,8 @@ has %!langs =
     up  => Upshift::Language::Upshift,
     txt => Upshift::Language::Text;
 
-method lang ($lang) {
+method lang ($lang is copy) {
+    $lang .= lc;
     %!langs{$lang}:exists ??
         %!langs{$lang} !!
         %!langs<txt>
@@ -63,18 +64,19 @@ method build () {
     rm_rf $.gen-path if $.gen-path.e;
     $.gen-path.mkdir;
 
+    my $up-ext = rx:i/\.up$/;
     my &lookup = -> $_ { self.name: $_ };
     for @!src-files -> $_ is copy {
         my $dest-path = $.gen-path.child: $_;
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
-        when $_ !~~ /\.up$/ {
-            self.log: "Including $_.relative($.path)";
+        when $_ !~~ $up-ext {
+            self.log: "Including $dest-path.relative($.path)";
             $.src-path.child($_).copy: $.gen-path.child: $_;
         }
         my $obj = self.name: $_;
-        s/\.up$//;
-        $dest-path = $dest-path.absolute.subst(rx/\.up$/,'').IO;
+        s/$up-ext//;
+        $dest-path = $dest-path.absolute.subst($up-ext,'').IO;
         unless $obj ~~ Str {
             self.log: "Building $_";
             $obj .= build: &lookup;

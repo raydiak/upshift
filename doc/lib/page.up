@@ -7,13 +7,15 @@
         ^head;
     </head>
     <body>
-        <h1>Upshift Documentation</h1>
-        <nav>
-            <a href="index.html">Intro</a>
-            <a href="usage.html">Usage</a>
-            <a href="syntax.html">Syntax</a>
-            <a href="contact.html">Contact</a>
-        </nav>
+        <header>
+            <h1>Upshift Documentation</h1>
+            <nav>
+                <a href="index.html"^?nav intro ' class="selected"';>Intro</a>
+                <a href="usage.html"^?nav usage ' class="selected"';>Usage</a>
+                <a href="syntax.html"^?nav syntax ' class="selected"';>Syntax</a>
+                <a href="contact.html"^?nav contact ' class="selected"';>Contact</a>
+            </nav>
+        </header>
         <article>
             ^? title ^'<h2>^title;</h2>^';
             <code>^body;</code>

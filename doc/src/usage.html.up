@@ -1,3 +1,4 @@
 ^page.up
     title Usage
+    nav usage
     body ^docs/usage;

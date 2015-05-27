@@ -1,3 +1,4 @@
 ^page.up
     title Intro
+    nav intro
     body ^docs/intro;

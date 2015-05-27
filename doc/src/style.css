@@ -16,33 +16,50 @@ body > * {
     text-align: left;
 }
 
-body > h1:first-child {
-    text-align: right;
-    color: #BFBFBF;
+header h1 {
+    color: #D7D7D7;
     margin: 0;
+    display: inline-block;
+    font-size: 2rem;
+    line-height: 2.3rem;
+    vertical-align: middle;
+}
+
+header {
+    position: relative;
+    overflow: hidden;
+    border-radius: .7rem;
+    margin: 0 0 1rem;
+    background: #5F5F5F;
+    padding: .25rem;
 }
 
 nav {
-    background: #5F5F5F;
     color: #FFFFFF;
     position: relative;
     overflow: hidden;
-    border-radius: .25rem;
-    margin: 1rem 0;
-    text-align: center;
+    float: right;
 }
 
 nav a {
     color: #EFEFEF;
-    padding: .25rem;
+    padding: .2rem;
     font-weight: bold;
     text-decoration: none;
-    font-size: larger;
+    font-size: 1.3rem;
+    line-height: 1.5rem;
+    vertical-align: middle;
     display: inline-block;
-    margin: .25rem;
-    border-radius: .25rem;
+    margin: 0;
+    border-radius: .5rem;
     background: inherit;
-    border: .25rem outset #7F7F7F;
+    border: .2rem outset #7F7F7F;
+}
+
+nav a.selected {
+    color: #BFBFBF;
+    border-style: inset;
+    cursor: default;
 }
 
 body > article {

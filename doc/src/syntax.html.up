@@ -1,3 +1,4 @@
 ^page.up
     title Syntax
+    nav syntax
     body ^docs/syntax;

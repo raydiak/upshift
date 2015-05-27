@@ -1,3 +1,4 @@
 ^page.up
     title Contact
+    nav contact
     body ^docs/contact;

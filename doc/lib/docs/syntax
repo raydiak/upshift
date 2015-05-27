@@ -1,0 +1,76 @@
+The syntax is as follows:
+
+- All text is parsed as plain literal characters until a ^ is encountered.
+
+- ^^ represents a single literal '^' character.
+
+- Within any ^ sequence, even an escaped escape or quote, whitespace is
+  optional in most places except between literals. Put another way, places
+  where you might, in other languages, be used to putting a comma after a term
+  or a required space or punctuation after a keyword, are required whitespace
+  in Upshift, and other whitespace around Upshift-syntactic characters like ^,
+  ?, !, ; is valid, optional, and ignored. Whitespace outside of an Upshift
+  expression or inside of a quote/upquote is always taken literally.
+
+- The final closing marker in most Upshift escapes and literals may be omitted
+  at the end of the file. See example/src/index.html for an example. This
+  includes (but may not be limited to) the terminating ; of an Upshift
+  statement as well as any closing quote or upquote of a literal within a
+  statement. Multiple such delimiters may be omitted as long as they all fall
+  at the end of the file. The aforementioned example omits both the ^' at the
+  end of the 'body' value, and the ; at the end of the 'page.up' insertion
+  which comprises the whole file.
+
+- Names are currently looked up in a rather static way, first as parameters
+  passed in from an insertion call, then from the root of src and lib in that
+  order, stopping at the first defined value it finds. No name mangling is
+  applied, so for example to refer to a template file named
+  "lib/site/nav.html.up" the corresponding name would be "site/nav.html.up".
+
+Insertion of vars/params/templates/files:
+
+    ^name;
+        - Inserts the value of the symbol "name"
+
+    ^name param val;
+        - Inserts the value of the symbol name, passing it a parameter named
+          "param" with the value "val"
+        - Name is a bare unquoted literal only; param and value are any literal
+          or a nested Upshift statement, though the param name might not always
+          work as an Upshift statement yet
+
+Conditionals:
+
+    ^?name bar;
+        - Inserts bar if the symbol "name"'s value is not ''
+        - Name must be a bare literal as in insertion (described previously)
+
+    ^?name foo bar;
+        - Inserts bar if the symbol "name"'s value is "foo"
+
+    ^?name foo foo ! bar bar ! ^name; ;
+        - If name's value is "foo", insert literal "foo"; else if name is bar,
+          insert "bar", else insert the value of the "name" symbol
+
+Upshift Literals (inside ^ statements, above):
+
+    foo
+        - Bare unquoted literal
+        - Required form in certain places like the name in an insertion call
+        - All letters and numbers are allowed as well as . / \ - and _
+
+    'foo' (or "foo")
+        - Quoted, allows whitespace and other special characters
+        - ^' escapes a quote to insert a "'" in a quoted string
+        - ^^ escapes a ^
+        - Any other ^ is invalid, and any other ' ends the literal
+        - The rules for double quotes ("") are the same as single quotes, they
+          don't indicate any special processing or interpolation as in some
+          other languages like Perl; use upquotes (below) for that
+
+    ^'foo^' (or ^"foo^")
+        - Inserts a subdefinition in the same format as a standalone template
+        - We call this "upquoted"
+        - Same escaping rules as the mainline/top level of the template
+        - As with normal quotes (above), single and double quotes are
+          semantically identical

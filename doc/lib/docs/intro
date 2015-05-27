@@ -1,0 +1,24 @@
+Upshift is an experimental templating system in Perl 6. It may become more in
+the future, but for now it is simply a templating system. Some of the goals in
+mind surrounding the existing work to varying degrees are:
+
+- Simple syntax; attempt to require as little as possible in the way of
+  memorization and comprehension of the semantics of Upshift, Perl, parsers,
+  programming in general, etc. Thus it uses a DSL.
+
+- Be able to template Perl, HTML, CSS, JavaScript, XML, JSON, and hopefully,
+  generally "whatever", with a minimal amount of escaping required in as many
+  cases as possible. Thus the only character which must be escaped is the
+  carrot ("^"), which introduces all non-literal constructs.
+
+- Build the next version of my website with it. Thus there are ways to have a
+  single file which defines multiple inserts for head, title, body, etc. This
+  means many other things as well, but the metavalue is "it will be somewhat
+  pre-tested to be sanely productive for some subset of web uses". Note this
+  does *not* mean that Upshift is intended for web uses only, or even
+  primarily, but it is definitely designed with them in mind.
+
+- Allow large definition libraries while only loading and parsing the parts
+  which are used. Also, don't require tedious predeclarations. Thus named
+  symbols are loaded lazily and templates are parsed one time only as needed,
+  then cached and simply re-paramaterized for each instantiation.

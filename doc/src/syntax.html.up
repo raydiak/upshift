@@ -1,0 +1,3 @@
+^page.up
+    title Syntax
+    body ^docs/syntax;

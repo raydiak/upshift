@@ -1,0 +1,3 @@
+^page.up
+    title Intro
+    body ^docs/intro;

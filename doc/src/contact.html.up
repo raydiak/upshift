@@ -1,0 +1,3 @@
+^page.up
+    title Contact
+    body ^docs/contact;

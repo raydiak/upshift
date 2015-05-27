@@ -1,0 +1,3 @@
+^page.up
+    title Usage
+    body ^docs/usage;

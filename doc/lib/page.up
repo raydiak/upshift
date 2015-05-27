@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Upshift Documentation^?title ^' - ^title;^';</title>
+        <link rel="stylesheet" href="style.css">
+        ^head;
+    </head>
+    <body>
+        <h1>Upshift Documentation</h1>
+        <nav>
+            <a href="index.html">Intro</a>
+            <a href="usage.html">Usage</a>
+            <a href="syntax.html">Syntax</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+        <article>
+            ^? title ^'<h2>^title;</h2>^';
+            <code>^body;</code>
+        </article>
+    </body>
+</html>

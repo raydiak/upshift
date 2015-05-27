@@ -19,7 +19,7 @@ method gist {
 }
 
 method build (&lookup) {
-    when !@.children { "\n" }
+    when !@.children { '' }
     when ?$.call {
         my &new-lookup = %.params ??
             -> $_ {
@@ -59,11 +59,7 @@ method build (&lookup) {
         }
     }
     
-    when @new == 1 && @new[0] ~~ Str {
-        my $out = @new[0];
-        $out ~= "\n" unless $out.ends-with: "\n";
-        $out;
-    }
+    when @new == 1 && @new[0] ~~ Str { @new[0] }
 
     self.new: :children(@new);
 }

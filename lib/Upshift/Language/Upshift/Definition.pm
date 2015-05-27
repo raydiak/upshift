@@ -18,7 +18,7 @@ method gist {
     @.children.map( "\n" ~ *.gist.indent: 4 ).join
 }
 
-method build (&lookup) {
+method to-string (&lookup) {
     when !@.children { '' }
     when ?$.call {
         my &new-lookup = %.params ??
@@ -33,7 +33,7 @@ method build (&lookup) {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';
         }
-        build-part $part, &new-lookup;
+        part-to-string $part, &new-lookup;
     }
 
     when ?$.conditional {
@@ -42,16 +42,16 @@ method build (&lookup) {
             #note " * Assuming empty string for undefined name '@.children[0]'";
             $cond-val = '';
         }
-        $cond-val = build-part $cond-val, &lookup;
+        $cond-val = part-to-string $cond-val, &lookup;
 
         my $i = @.conditions.first: -> $i { $cond-val ~~ @.children[$i] };
-        when $i.defined { build-part @.children[$i+1], &lookup }
-        when ?$.has-else { build-part @.children[*-1], &lookup }
+        when $i.defined { part-to-string @.children[$i+1], &lookup }
+        when ?$.has-else { part-to-string @.children[*-1], &lookup }
         '';
     }
     
     my @new;
-    for @.children.map({ build-part $_, &lookup }) {
+    for @.children.map({ part-to-string $_, &lookup }) {
         if $_ ~~ Str && @new && @new[*-1] ~~ Str {
             @new[*-1] ~= $_;
         } else {
@@ -64,7 +64,7 @@ method build (&lookup) {
     self.new: :children(@new);
 }
 
-multi sub build-part (::?CLASS $p, &lookup) { $p.build: &lookup }
-multi sub build-part ($p, &lookup?) { ~$p }
+multi sub part-to-string (::?CLASS $p, &lookup) { $p.to-string: &lookup }
+multi sub part-to-string ($p, &lookup?) { ~$p }
 
 # vim: ft=perl6

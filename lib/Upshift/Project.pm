@@ -66,7 +66,7 @@ method build () {
 
     my $up-ext = rx:i/\.up$/;
     my &lookup = -> $_ { self.name: $_ };
-    for @!src-files -> $_ is copy {
+    for @!src-files {
         my $dest-path = $.gen-path.child: $_;
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
@@ -74,20 +74,20 @@ method build () {
             self.log: "Including $dest-path.relative($.path)";
             $.src-path.child($_).copy: $.gen-path.child: $_;
         }
-        my $obj = self.name: $_;
-        s/$up-ext//;
         $dest-path = $dest-path.absolute.subst($up-ext,'').IO;
-        unless $obj ~~ Str {
-            self.log: "Building $_";
-            $obj .= build: &lookup;
-            die "Error building $_" unless $obj ~~ Str;
-        }
-        self.log: "Writing $dest-path.relative($.path)";
-        $dest-path.spurt: $obj;
+        self.log: "Building $dest-path.relative($.path)";
+        self.log-inc;
+        my $obj = self.name: $_;
+        my $lang = self.lang: $_;
+        $lang.to-file: $dest-path, $obj, &lookup;
+        self.log-dec;
     }
 }
 
-method log ($msg) { note $msg }
+has $!log-depth = 0;
+method log ($msg) { note '    ' x $!log-depth ~ $msg }
+method log-inc { ++$!log-depth }
+method log-dec { $!log-depth && --$!log-depth }
 
 
 

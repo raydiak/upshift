@@ -16,22 +16,25 @@ body > * {
     text-align: left;
 }
 
+header {
+    position: relative;
+    overflow: hidden;
+    border-radius: .75rem;
+    margin: 0 0 1rem;
+    background: #5F5F5F;
+    padding: .25rem;
+    box-shadow: #5F5F5F 0 0 .5rem .25rem;
+    letter-spacing: .1rem;
+}
+
 header h1 {
     color: #D7D7D7;
     margin: 0;
     display: inline-block;
     font-size: 2rem;
-    line-height: 2.3rem;
-    vertical-align: middle;
-}
-
-header {
-    position: relative;
-    overflow: hidden;
-    border-radius: .7rem;
-    margin: 0 0 1rem;
-    background: #5F5F5F;
-    padding: .25rem;
+    font-weight: normal;
+    line-height: 2.5rem;
+    font-family: serif;
 }
 
 nav {
@@ -39,21 +42,35 @@ nav {
     position: relative;
     overflow: hidden;
     float: right;
+    text-align: right;
 }
 
 nav a {
     color: #EFEFEF;
-    padding: .2rem;
-    font-weight: bold;
+    padding: .25rem;
+    font-weight: normal;
     text-decoration: none;
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     line-height: 1.5rem;
     vertical-align: middle;
     display: inline-block;
     margin: 0;
     border-radius: .5rem;
-    background: inherit;
-    border: .2rem outset #7F7F7F;
+    border: .25rem outset #7F7F7F;
+}
+
+nav a:hover {
+    color: #FFFFFF;
+}
+
+nav a:active {
+    color: #BFBFBF;
+    border-style: inset;
+}
+
+nav a:focus {
+    color: #BFBFBF;
+    border-style: inset;
 }
 
 nav a.selected {
@@ -70,7 +87,7 @@ body > article {
     margin: 0;
     border-radius: .25rem;
     display: inline-block;
-    min-width: 80%;
+    min-width: 75%;
     max-width: 100%;
     text-align: center;
 }

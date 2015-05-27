@@ -1,4 +1,4 @@
-^page
+^page.up
     title 'Home Page'
     head '
         <style type="text/css">

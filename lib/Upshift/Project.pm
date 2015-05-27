@@ -4,8 +4,7 @@ use File::Find;
 use Shell::Command;
 
 use Upshift::Language::Upshift;
-
-has $.in-lang = Upshift::Language::Upshift;
+use Upshift::Language::Text;
 
 # project root
 has IO::Path $.path = die 'path is required';
@@ -13,40 +12,36 @@ has IO::Path $.path = die 'path is required';
 # destination for generated output
 has IO::Path $.gen-path = $!path.child: 'gen';
 
-# source files/templates to convert into gen
+# source files to process into gen
 has IO::Path $.src-path = $!path.child: 'src';
 has IO::Path @.src-files =
     find(:dir($!src-path), :type<file>)».relative($!src-path)».IO;
 
-# processed template library for use but not outputted into gen
+# files for use but not outputted into gen
 has IO::Path $.lib-path = $!path.child: 'lib';
 has IO::Path @.lib-files = $!lib-path.e ??
     find(:dir($!lib-path), :type<file>)».relative($!lib-path)».IO !! ();
 
-# included in gen but not processed as templates
-has IO::Path $.inc-path = $!path.child: 'inc';
-has IO::Path @.inc-files = $!inc-path.e ??
-    find(:dir($!inc-path), :type<file>)».relative($!inc-path)».IO !! ();
+has %!langs =
+    up  => Upshift::Language::Upshift,
+    txt => Upshift::Language::Text;
 
-# raw unprocessed resources not copied into gen but available to use
-has IO::Path $.res-path = $!path.child: 'res';
-has IO::Path @.res-files = $!res-path.e ??
-    find(:dir($!res-path), :type<file>)».relative($!res-path)».IO !! ();
+method lang ($lang) {
+    %!langs{$lang}:exists ??
+        %!langs{$lang} !!
+        %!langs<txt>
+}
 
 has %!names;
 method name ($name) is rw { %!names{$name} //= self!load: $name }
 
 method !load ($name) {
-    for <src lib inc res> {
+    for <src lib> {
         my @files := self."$_\-files"();
-        if $name ~~ @files».Str.any {
-            if $_ ~~ <src lib>.any {
-                self.log: "Reading and parsing $name";
-                return $.in-lang.from-file: self."$_\-path"().child($name);
-            }
-            self.log: "Reading $_/$name";
-            return self."$_\-path"().child($name).slurp.chomp;
-        }
+        next unless $name ~~ @files».Str.any;
+        my $lang = self.lang: $name.IO.extension;
+        self.log: "Loading $name";
+        return $lang.from-file: self."$_\-path"().child($name);
     }
     return Any;
 }
@@ -68,19 +63,20 @@ method build () {
     rm_rf $.gen-path if $.gen-path.e;
     $.gen-path.mkdir;
 
-    for @!inc-files {
-        self.log: "Including $_";
-        $.inc-path.child($_).copy: $.gen-path.child: $_;
-    }
-
     my &lookup = -> $_ { self.name: $_ };
-    for @!src-files {
-        self.log: "Generating $_";
-        my $obj = self.name: $_;
+    for @!src-files -> $_ is copy {
         my $dest-path = $.gen-path.child: $_;
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
+        when $_ !~~ /\.up$/ {
+            self.log: "Including $_.relative($.path)";
+            $.src-path.child($_).copy: $.gen-path.child: $_;
+        }
+        my $obj = self.name: $_;
+        s/\.up$//;
+        $dest-path = $dest-path.absolute.subst(rx/\.up$/,'').IO;
         unless $obj ~~ Str {
+            self.log: "Building $_";
             $obj .= build: &lookup;
             die "Error building $_" unless $obj ~~ Str;
         }

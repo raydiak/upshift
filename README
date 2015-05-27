@@ -35,19 +35,20 @@ the destination for output.
 > upshift example foo
     # process ./example into ./foo
 
-Projects are comprised of templates and non-template files separated into
-subdirectories according to their role in the project's processing and output.
-The final resulting file structure goes in gen/ which will be deleted if it
-already exists. Generation is done by copying the contents of inc/ into gen/
-and then processing the contents of src/ as template files, loading symbol
-names from all directories as needed, and writing each result into gen/ under
-the same file name.
+An Upshift project is a directory, comprised of files separated into
+subdirectories according to their role in the project's processing. The final
+resulting file structure goes in gen/ which will be deleted if it already
+exists. Generation is done by iterating over the contents of src/ recursively.
+Files ending with the .up extension are processed as Upshift templates, and the
+resulting string is written into gen/ under the same file name without the .up
+extension. All other files in src/ are copied without alteration of name or
+contents. Files in lib/ are available to use in Upshift templates by name, and
+are read as Upshift templates with the .up extension, otherwise as UTF-8 text
+files.
 
 gen/    - where the output goes
-src/    - where the input comes from; each template processed into gen
-inc/    - copied into gen without processing
-lib/    - templates available to use by name but not processed into gen
-res/    - raw non-template files available by name but not included in gen
+src/    - where the input comes from; each file processed into gen
+lib/    - files available to use by name but not processed into gen
 
 
 
@@ -71,14 +72,14 @@ The syntax is as follows:
   statement as well as any closing quote or upquote of a literal within a
   statement. Multiple such delimiters may be omitted as long as they all fall
   at the end of the file. The aforementioned example omits both the ^' at the
-  end of the 'body' value, and the ; at the end of the 'page' insertion which
-  comprises the whole file.
+  end of the 'body' value, and the ; at the end of the 'page.up' insertion
+  which comprises the whole file.
 
 - Names are currently looked up in a rather static way, first as parameters
-  passed in from an insertion call, then from the root of src, lib, inc, and
-  res in that order, stopping at the first defined value it finds. No name
-  mangling is applied, so for example to refer to a template file named
-  "lib/site/nav.html" the corresponding name would be "site/nav.html".
+  passed in from an insertion call, then from the root of src and lib in that
+  order, stopping at the first defined value it finds. No name mangling is
+  applied, so for example to refer to a template file named
+  "lib/site/nav.html.up" the corresponding name would be "site/nav.html.up".
 
 Insertion of vars/params/templates/files:
 

@@ -1,7 +1,5 @@
 unit role Upshift::Language[Grammar $grammar, Any $actions];
 
-method grammar { $grammar }
-method actions { $actions }
 method from-file (IO::Path:D $file) {
     self.from-string: $file.slurp.chomp;
 }

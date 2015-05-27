@@ -24,9 +24,18 @@ mind surrounding the existing work to varying degrees are:
 
 
 
+An Upshift project is a directory, comprised of files separated into
+subdirectories according to their role in the project.
+
+gen/    - where the output goes by default
+src/    - where the input comes from; each file processed into gen/
+lib/    - files available to use by name; not processed into gen/
+
 Processing is accomplished by calling the "upshift" script with the path to the
-project's root directory. An optional second parameter will override gen/ as
-the destination for output.
+project's root directory. An optional second parameter specifies the
+destination for output, which defaults to the project's gen/ subdirectory.
+
+The output directory WILL BE DELETED before processing begins, if it exists.
 
 > upshift example
     # process ./example into ./example/gen
@@ -34,23 +43,16 @@ the destination for output.
 > upshift example foo
     # process ./example into ./foo
 
-An Upshift project is a directory, comprised of files separated into
-subdirectories according to their role in the project's processing. The final
-resulting file structure goes in gen/ which will be deleted if it already
-exists.
-
 Generation is done by iterating over the contents of src/ recursively. Files
 ending with the .up extension (regardless of upper/lowercase) are processed as
 Upshift templates, and the resulting string is written into gen/ under the same
-file name without the .up extension. All other files in src/ are copied without
-alteration of name or contents.
+file name without the .up extension. All other files in src/ are copied into
+gen/ without alteration of name or contents, and are available to insert by
+name in templates, where they are treated as plain UTF-8 text files.
 
-Files in lib/ are available to use in Upshift templates by name, and are read
-as Upshift templates with the .up extension, otherwise as UTF-8 text files.
-
-gen/    - where the output goes
-src/    - where the input comes from; each file processed into gen
-lib/    - files available to use by name but not processed into gen
+Files in lib/ are available to Upshift templates as either text or templates
+based on file extension as in src/ (above), but are not directly included as
+files in the output.
 
 
 

@@ -4,7 +4,7 @@
         <style type="text/css">
             img {
                 display: block;
-                margin: 0 auto 1em;
+                margin: 1em auto;
                 max-width: 100%;
                 border: .2em solid black;
             }

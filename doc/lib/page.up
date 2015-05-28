@@ -16,9 +16,9 @@
                 <a href="contact.html"^?nav contact ' class="selected"';>Contact</a>
             </nav>
         </header>
-        <article>
+        <main>
             ^? title ^'<h2>^title;</h2>^';
-            <code>^body;</code>
-        </article>
+            <article><code>^body;</code></article>
+        </main>
     </body>
 </html>

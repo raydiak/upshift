@@ -31,10 +31,12 @@ header h1 {
     color: #D7D7D7;
     margin: 0;
     display: inline-block;
-    font-size: 2rem;
     font-weight: normal;
-    line-height: 2.5rem;
+    font-size: 2rem;
+    line-height: 2rem;
+    padding: .25rem;
     font-family: serif;
+    text-shadow: #000000 0 0 .75rem;
 }
 
 nav {
@@ -64,12 +66,12 @@ nav a:hover {
 }
 
 nav a:active {
-    color: #BFBFBF;
+    color: #FFFFFF;
     border-style: inset;
 }
 
 nav a:focus {
-    color: #BFBFBF;
+    color: #FFFFFF;
     border-style: inset;
 }
 
@@ -79,7 +81,7 @@ nav a.selected {
     cursor: default;
 }
 
-body > article {
+main {
     background: #FFFFFF;
     position: relative;
     overflow: hidden;
@@ -89,19 +91,20 @@ body > article {
     display: inline-block;
     min-width: 75%;
     max-width: 100%;
-    text-align: center;
 }
 
-body > article > * {
-    text-align: left;
-}
-
-body > article > h2:first-child {
+main > h2:first-child {
     margin-top: 0;
 }
 
-body > article > code {
+main > article {
+    color: #171717;
+    text-align: center;
+}
+
+main > article > code {
     display: inline-block;
+    text-align: left;
 }
 
 code {

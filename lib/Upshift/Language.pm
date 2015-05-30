@@ -17,6 +17,7 @@ method to-file (IO::Path:D $file, $obj, |args) {
     $file.spurt: $build;
 }
 
-method to-string ($obj, |args) { $obj ~~ Str ?? $obj !! $obj.to-string: |args }
+multi method to-string (Str $obj, |) { $obj }
+multi method to-string ($obj, |args) { $obj.to-string: |args }
 
 # vim: ft=perl6

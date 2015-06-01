@@ -105,7 +105,7 @@ method build (Bool :$force = False) {
         self.log-dec;
     }
 
-    for %gen-files.values {
+    for %gen-files.sort.reverse».value {
         self.log: "Removing nonexistent $_.relative($.path)";
         .d ?? .rmdir !! .unlink;
     }

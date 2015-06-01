@@ -69,6 +69,7 @@ method build (Bool :$force = False) {
     }
 
     my $up-ext = rx:i/\.up$/;
+    my $gen-str = $.gen-path.absolute;
     my &lookup = -> $_ { self.name: $_ };
     for @!src-files {
         my $is-up = so $_ ~~ $up-ext;
@@ -79,7 +80,13 @@ method build (Bool :$force = False) {
         my $path-str = $dest-path.relative($.path);
         if %gen-files && $dest-path.e {
             %gen-files{$dest-path.absolute} :delete;
-            %gen-files{$dest-dir.absolute} :delete;
+            my $dir = $dest-dir;
+            my $dir-str = $dir.absolute;
+            while $dir-str.chars > $gen-str.chars {
+                %gen-files{$dir-str} :delete;
+                $dir .= parent;
+                $dir-str = $dir.absolute;
+            }
             if !$is-up && $dest-path.modified > $.src-path.child($_).modified {
                 self.log: "Skipping up-to-date $path-str";
                 next;

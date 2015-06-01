@@ -48,39 +48,59 @@ method !load ($name) {
 }
 
 submethod BUILD (:$path?, :$gen-path?) {
-    if $path.defined {
-        die 'The empty string is not allowed as a path (Upshift::Project.path); use "." to represent the current directory, or an undefined value to use the default' if $path eq '';
-        $!path = $path.IO;
-    }
-    if $gen-path.defined {
-        die 'The empty string is not allowed as a path (Upshift::Project.gen-path); use "." to represent the current directory, or an undefined value to use the default, and take special care with the gen-path as its existing contents will be entirely erased' if $gen-path eq '';
-        $!gen-path = $gen-path.IO;
-    }
+    $!path = $path.IO if $path.defined;
+    $!gen-path = $gen-path.IO if $gen-path.defined;
 }
 
-method build () {
+method build (Bool :$force = False) {
     use fatal;
 
-    rm_rf $.gen-path if $.gen-path.e;
-    $.gen-path.mkdir;
+    my %gen-files;
+    if $force {
+        rm_rf $.gen-path;
+        $.gen-path.mkdir;
+    } else {
+        if $.gen-path.e {
+            %gen-files = find(dir => $.gen-path).map:
+                { .absolute => $_ };
+        } else {
+            $.gen-path.mkdir;
+        }
+    }
 
     my $up-ext = rx:i/\.up$/;
     my &lookup = -> $_ { self.name: $_ };
     for @!src-files {
+        my $is-up = so $_ ~~ $up-ext;
         my $dest-path = $.gen-path.child: $_;
+        $dest-path = $dest-path.absolute.subst($up-ext,'').IO if $is-up;
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
-        when $_ !~~ $up-ext {
-            self.log: "Including $dest-path.relative($.path)";
+        my $path-str = $dest-path.relative($.path);
+        if %gen-files && $dest-path.e {
+            %gen-files{$dest-path.absolute} :delete;
+            %gen-files{$dest-dir.absolute} :delete;
+            if !$is-up && $dest-path.modified > $.src-path.child($_).modified {
+                self.log: "Skipping up-to-date $path-str";
+                next;
+            }
+            .unlink;
+        }
+        when !$is-up {
+            self.log: "Including $path-str";
             $.src-path.child($_).copy: $.gen-path.child: $_;
         }
-        $dest-path = $dest-path.absolute.subst($up-ext,'').IO;
-        self.log: "Building $dest-path.relative($.path)";
+        self.log: "Building $path-str";
         self.log-inc;
         my $obj = self.name: $_;
         my $lang = self.lang: $_;
         $lang.to-file: $dest-path, $obj, &lookup;
         self.log-dec;
+    }
+
+    for %gen-files.values {
+        self.log: "Removing nonexistent $_.relative($.path)";
+        .d ?? .rmdir !! .unlink;
     }
 }
 

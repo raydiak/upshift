@@ -5,11 +5,11 @@ use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
 
 use Upshift;
 
-sub MAIN (Str $project, Str $destination?) {
+sub MAIN (Str $project, Str $destination?, Bool :$force = False) {
     if $destination.defined {
-        Upshift::build $project, $destination;
+        Upshift::build $project, $destination, :$force;
     } else {
-        Upshift::build $project;
+        Upshift::build $project, :$force;
     }
 }
 

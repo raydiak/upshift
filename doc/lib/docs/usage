@@ -9,7 +9,11 @@ Processing is accomplished by calling the "upshift" script with the path to the
 project's root directory. An optional second parameter specifies the
 destination for output, which defaults to the project's gen/ subdirectory.
 
-The output directory WILL BE DELETED before processing begins, if it exists.
+The output directory's contents WILL BE DELETED, except where it is newer than
+the contents of src/ and is not an Upshift template (which are always rebuilt
+rather than performing a recursive dependency timestamp analysis). This
+timestamp check can be disabled by passing --force, which will completely
+remove the output directory before any source files are processed.
 
 > upshift example
     # process ./example into ./example/gen

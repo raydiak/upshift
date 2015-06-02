@@ -78,6 +78,7 @@ method build (Bool :$force = False) {
         my $dest-dir = $dest-path.parent;
         $dest-dir.mkdir unless $dest-dir.e;
         my $path-str = $dest-path.relative($.path);
+        my $src-path = $.src-path.child: $_;
         if %gen-files && $dest-path.e {
             %gen-files{$dest-path.absolute} :delete;
             my $dir = $dest-dir;
@@ -87,7 +88,9 @@ method build (Bool :$force = False) {
                 $dir .= parent;
                 $dir-str = $dir.absolute;
             }
-            if !$is-up && $dest-path.modified > $.src-path.child($_).modified {
+            if !$is-up &&
+                $dest-path.s == $src-path.s &&
+                $dest-path.modified > $src-path.modified {
                 self.log: "Skipping up-to-date $path-str";
                 next;
             }
@@ -95,7 +98,7 @@ method build (Bool :$force = False) {
         }
         when !$is-up {
             self.log: "Including $path-str";
-            $.src-path.child($_).copy: $.gen-path.child: $_;
+            $src-path.copy: $.gen-path.child: $_;
         }
         self.log: "Building $path-str";
         self.log-inc;

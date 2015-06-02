@@ -15,12 +15,12 @@ has IO::Path $.gen-path = $!path.child: 'gen';
 # source files to process into gen
 has IO::Path $.src-path = $!path.child: 'src';
 has IO::Path @.src-files =
-    find(:dir($!src-path), :type<file>)».relative($!src-path)».IO;
+    find(dir => $!src-path)».relative($!src-path)».IO.sort;
 
 # files for use but not outputted into gen
 has IO::Path $.lib-path = $!path.child: 'lib';
 has IO::Path @.lib-files = $!lib-path.e ??
-    find(:dir($!lib-path), :type<file>)».relative($!lib-path)».IO !! ();
+    find(dir => $!lib-path)».relative($!lib-path)».IO !! ();
 
 has %!langs =
     up  => Upshift::Language::Upshift,
@@ -72,27 +72,24 @@ method build (Bool :$force = False) {
     my $gen-str = $.gen-path.absolute;
     my &lookup = -> $_ { self.name: $_ };
     for @!src-files {
-        my $is-up = so $_ ~~ $up-ext;
-        my $dest-path = $.gen-path.child: $_;
-        $dest-path = $dest-path.absolute.subst($up-ext,'').IO if $is-up;
-        my $dest-dir = $dest-path.parent;
-        $dest-dir.mkdir unless $dest-dir.e;
-        my $path-str = $dest-path.relative($.path);
         my $src-path = $.src-path.child: $_;
+        my $dest-path = $.gen-path.child: $_;
+        when $src-path.d {
+            if %gen-files && $dest-path.e {
+                %gen-files{$dest-path.absolute} :delete;
+            } else {
+                $dest-path.mkdir;
+            }
+        }
+        my $is-up = so $_ ~~ $up-ext;
+        $dest-path = $dest-path.absolute.subst($up-ext,'').IO if $is-up;
+        my $path-str = $dest-path.relative($.path);
         if %gen-files && $dest-path.e {
             %gen-files{$dest-path.absolute} :delete;
-            my $dir = $dest-dir;
-            my $dir-str = $dir.absolute;
-            while $dir-str.chars > $gen-str.chars {
-                %gen-files{$dir-str} :delete;
-                $dir .= parent;
-                $dir-str = $dir.absolute;
-            }
-            if !$is-up &&
+            when !$is-up &&
                 $dest-path.s == $src-path.s &&
                 $dest-path.modified > $src-path.modified {
                 self.log: "Skipping up-to-date $path-str";
-                next;
             }
             .unlink;
         }

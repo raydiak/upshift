@@ -1,4 +1,5 @@
 use Upshift::Language;
+use Upshift::Language::Upshift::Definition;
 
 # some of these probably ought to be renamed
 
@@ -86,8 +87,6 @@ grammar Upshift::Language::Upshift::Grammar {
 }
 
 class Upshift::Language::Upshift::Actions {
-    use Upshift::Language::Upshift::Definition;
-
     has @.cond-names;
 
     method TOP ($/) { make Upshift::Language::Upshift::Definition.new: :children($0».values».made) }

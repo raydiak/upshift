@@ -18,7 +18,17 @@ method gist {
     @.children.map( "\n" ~ *.gist.indent: 4 ).join
 }
 
-method to-string (&lookup) {
+multi method to-string (*%lookup) {
+    %lookup ??
+        self.to-string: %lookup !!
+        self.to-string: -> $ {}
+}
+multi method to-string (%lookup) {
+    %lookup ??
+        self.to-string: -> $name { %lookup{$name} } !!
+        self.to-string: -> $ {}
+}
+multi method to-string (&lookup) {
     when !@.children { '' }
     when ?$.call {
         my &new-lookup = %.params ??
@@ -64,7 +74,7 @@ method to-string (&lookup) {
     self.new: :children(@new);
 }
 
-multi sub part-to-string (::?CLASS $p, &lookup) { $p.to-string: &lookup }
-multi sub part-to-string ($p, &lookup?) { ~$p }
+multi sub part-to-string (::?CLASS $p, |args) { $p.to-string: |args }
+multi sub part-to-string ($p, |) { $p.Str }
 
 # vim: ft=perl6

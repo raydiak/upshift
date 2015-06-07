@@ -1,36 +1,57 @@
-unit class Upshift::Language::Upshift::Definition;
+class Upshift::Language::Upshift::Definition {
+    has @.children;
 
-has @.children;
+    method gist {
+        self.^name ~
+        @.children.map( "\n" ~ *.gist.indent: 4 ).join
+    }
 
-has $.call;
-    has $.name = $!call ?? @!children[0] !! Any;
-    has %.params = $!call && @!children > 1 ??
-        @!children[1..*] !! ();
+    multi method to-string (*%lookup) {
+        %lookup ??
+            self.to-string: %lookup !!
+            self.to-string: -> $ {}
+    }
+    multi method to-string (%lookup) {
+        %lookup ??
+            self.to-string: -> $name { %lookup{$name} } !!
+            self.to-string: -> $ {}
+    }
+    multi method to-string (&lookup) {
+        when !@.children { '' }
 
-has $.conditional;
-    has $.has-else = (@!children %% 2 if $!conditional);
-    has @.conditions = (1, 3 ...^ @!children - 1 if $!conditional);
+        my @new;
+        for @.children.map({ self.part-to-string: $_, &lookup }) {
+            if $_ ~~ Str && @new && @new[*-1] ~~ Str {
+                @new[*-1] ~= $_;
+            } else {
+                @new.push: $_;
+            }
+        }
 
-method gist {
-    self.^name ~
-    ' :call' x ?$.call ~
-    ' :conditional' x ?$.conditional ~
-    @.children.map( "\n" ~ *.gist.indent: 4 ).join
+        when @new == 1 && @new[0] ~~ Str { @new[0] }
+
+        self.new: :children(@new);
+    }
+
+    multi method part-to-string (::?CLASS $p, |args) { $p.to-string: |args }
+    multi method part-to-string ($p, |) { $p.Str }
 }
 
-multi method to-string (*%lookup) {
-    %lookup ??
-        self.to-string: %lookup !!
-        self.to-string: -> $ {}
-}
-multi method to-string (%lookup) {
-    %lookup ??
-        self.to-string: -> $name { %lookup{$name} } !!
-        self.to-string: -> $ {}
-}
-multi method to-string (&lookup) {
-    when !@.children { '' }
-    when ?$.call {
+class Upshift::Language::Upshift::Definition::Call {
+    also is Upshift::Language::Upshift::Definition;
+
+    has $.name = self.children[0];
+    has %.params = self.children > 1 ??
+        self.children[1..*] !! ();
+
+    #`[[[
+    submethod BUILD (:$!name, :%!params) {
+        die "$?CLASS.^name() requires one or more \@.children"
+            unless self.children;
+    }
+    ]]]
+
+    multi method to-string (&lookup) {
         my &new-lookup = %.params ??
             -> $_ {
                 %.params{$_}:exists ??
@@ -43,38 +64,36 @@ multi method to-string (&lookup) {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';
         }
-        part-to-string $part, &new-lookup;
+        self.part-to-string: $part, &new-lookup;
     }
+}
 
-    when ?$.conditional {
+class Upshift::Language::Upshift::Definition::Conditional {
+    also is Upshift::Language::Upshift::Definition;
+
+    has $.has-else = self.children %% 2;
+    has @.conditions = 1, 3 ...^ self.children - 1;
+
+    #`[[[
+    submethod BUILD (:$!has-else, :@!conditions) {
+        die "$?CLASS.^name() requires two or more \@.children"
+            unless self.children >= 2;
+    }
+    ]]]
+
+    multi method to-string (&lookup) {
         my $cond-val = lookup @.children[0];
         unless defined $cond-val {
             #note " * Assuming empty string for undefined name '@.children[0]'";
             $cond-val = '';
         }
-        $cond-val = part-to-string $cond-val, &lookup;
+        $cond-val = self.part-to-string: $cond-val, &lookup;
 
         my $i = @.conditions.first: -> $i { $cond-val ~~ @.children[$i] };
-        when $i.defined { part-to-string @.children[$i+1], &lookup }
-        when ?$.has-else { part-to-string @.children[*-1], &lookup }
+        when $i.defined { self.part-to-string: @.children[$i+1], &lookup }
+        when ?$.has-else { self.part-to-string: @.children[*-1], &lookup }
         '';
     }
-    
-    my @new;
-    for @.children.map({ part-to-string $_, &lookup }) {
-        if $_ ~~ Str && @new && @new[*-1] ~~ Str {
-            @new[*-1] ~= $_;
-        } else {
-            @new.push: $_;
-        }
-    }
-    
-    when @new == 1 && @new[0] ~~ Str { @new[0] }
-
-    self.new: :children(@new);
 }
-
-multi sub part-to-string (::?CLASS $p, |args) { $p.to-string: |args }
-multi sub part-to-string ($p, |) { $p.Str }
 
 # vim: ft=perl6

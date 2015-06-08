@@ -6,5 +6,6 @@ cd "$DIR"
 upshift .
 
 if [ $? -eq 0 ]; then
+    diff -u ../../README gen/README
     cp -v gen/README ../..
 fi

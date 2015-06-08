@@ -117,6 +117,11 @@ Conditionals:
 
 Upshift Literals (inside ^ statements, above):
 
+    Any Upshift escape previously mentioned (insertion or conditional) may
+    itself be used as a value within another Upshift sequence. To write an
+    explicit literal string within an Upshift sequence, the following forms are
+    supported:
+
     foo
         - Bare unquoted literal
         - Required form in certain places like the name in an insertion call
@@ -137,6 +142,12 @@ Upshift Literals (inside ^ statements, above):
         - Same escaping rules as the mainline/top level of the template
         - As with normal quotes (above), single and double quotes are
           semantically identical
+
+    'foo: '^foo; (or any other combination)
+        - All literal forms and escapes may be joined/concatenated by omitting
+          the otherwise-required whitespace in between them
+        - We call this a "compound literal"
+        - Semantically equivalent to an upquote (above)
 
 
 

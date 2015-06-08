@@ -47,18 +47,20 @@ grammar Upshift::Language::Upshift::Grammar {
     rule escape-statement-conditional-else {\! <literal=.escape-literal>}
     
     token escape-literal {
-        <escape-literal-bare> ||
-        <escape-literal-quoted> ||
-        <escape-literal-doublequoted> ||
-        <escape-literal-upquoted> ||
-        <escape-literal-updoublequoted> ||
-        #<escape-literal-symbol> ||
-        <escape> #`[[[ TODO
-            making this work everywhere probably includes more ::Definition changes
-                and possibly ::Project as well
-            which probably means upquotes and symbols have the same issues
-            also, making this work seems mutually exclusive with symbol (above)
-            starting to need tests ]]]
+        (
+            <escape-literal-bare> ||
+            <escape-literal-quoted> ||
+            <escape-literal-doublequoted> ||
+            <escape-literal-upquoted> ||
+            <escape-literal-updoublequoted> ||
+            #<escape-literal-symbol> ||
+            <escape> #`[[[ TODO
+                making this work everywhere probably includes more ::Definition changes
+                    and possibly ::Project as well
+                which probably means upquotes and symbols have the same issues
+                also, making this work seems mutually exclusive with symbol (above)
+                starting to need tests ]]]
+        )+
     }
     token escape-literal-bare { <[ \w \- \/ \\ \. ]>+ }
     token escape-literal-quoted {
@@ -89,7 +91,10 @@ grammar Upshift::Language::Upshift::Grammar {
 class Upshift::Language::Upshift::Actions {
     has @.cond-names;
 
-    method TOP ($/) { make Upshift::Language::Upshift::Definition.new: :children($0».values».made) }
+    method TOP ($/) {
+        make Upshift::Language::Upshift::Definition.new:
+            :children($0».values».made)
+    }
     method literal ($/) { make join '', $0».values».made }
     method literal-normal ($/) { make ~$/ }
     method literal-escape ($/) { make '^' }
@@ -115,7 +120,12 @@ class Upshift::Language::Upshift::Actions {
         
         make Upshift::Language::Upshift::Definition::Conditional.new: :@children;
     }
-    method escape-literal ($/) { make $/.values[0].made }
+    method escape-literal ($/) {
+        make @0 > 1 ??
+            Upshift::Language::Upshift::Definition.new:
+                children => @0.map: *.values[0].made !!
+            @0[0].values[0].made;
+    }
     method escape-literal-bare ($/) { make ~$/ }
     method escape-literal-quoted ($/) { make join '', $0».values».made }
     method escape-literal-quoted-literal ($/) { make ~$/ }

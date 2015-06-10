@@ -34,7 +34,11 @@ method lang ($lang is copy) {
 }
 
 has %!names;
-method name ($name) is rw { %!names{$name} //= self!load: $name }
+multi method name (Str(Cool) $name, :&lookup) is rw { %!names{$name} //= self!load: $name }
+multi method name ($name is copy, :&lookup) is rw {
+    $name .= to-string: &lookup;
+    %!names{$name} //= self!load: $name;
+}
 
 method !load ($name) {
     for <src lib> {
@@ -70,7 +74,7 @@ method build (Bool :$force = False) {
 
     my $up-ext = rx:i/\.up$/;
     my $gen-str = $.gen-path.absolute;
-    my &lookup = -> $_ { self.name: $_ };
+    my &lookup = -> $_ { self.name: $_, :&lookup };
     for @!src-files {
         my $src-path = $.src-path.child: $_;
         my $dest-path = $.gen-path.child: $_;
@@ -99,7 +103,7 @@ method build (Bool :$force = False) {
         }
         self.log: "Building $path-str";
         self.log-inc;
-        my $obj = self.name: $_;
+        my $obj = self.name: $_, :&lookup;
         my $lang = self.lang: $_;
         $lang.to-file: $dest-path, $obj, &lookup;
         self.log-dec;

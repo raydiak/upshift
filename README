@@ -63,9 +63,9 @@ files in the output.
 
 The syntax is as follows:
 
-- All text is parsed as plain literal characters until a ^ is encountered.
+- All text is parsed as plain literal characters until a "^" is encountered.
 
-- ^^ represents a single literal '^' character.
+- "^^" represents a single literal "^" character.
 
 - Within any ^ sequence, even an escaped escape or quote, whitespace is
   optional in most places except between literals. Put another way, places
@@ -76,11 +76,11 @@ The syntax is as follows:
   expression or inside of a quote/upquote is always taken literally.
 
 - The final closing marker in most Upshift escapes and literals may be omitted
-  at the end of the file. See example/src/index.html for an example. This
-  includes (but may not be limited to) the terminating ; of an Upshift
-  statement as well as any closing quote or upquote of a literal within a
-  statement. Multiple such delimiters may be omitted as long as they all fall
-  at the end of the file. The aforementioned example omits both the ^' at the
+  at the end of the file. See projects/example/src/index.html.up for an
+  example. This includes (but may not be limited to) the terminating ; of an
+  Upshift statement as well as any closing quote or upquote of a literal within
+  a statement. Multiple such delimiters may be omitted as long as they all fall
+  at the end of the file. The aforementioned example omits both the "^)" at the
   end of the 'body' value, and the ; at the end of the 'page.up' insertion
   which comprises the whole file.
 
@@ -98,15 +98,24 @@ Insertion of vars/params/templates/files:
     ^name param val;
         - Inserts the value of the symbol name, passing it a parameter named
           "param" with the value "val"
-        - Name is a bare unquoted literal only; param and value are any literal
-          or a nested Upshift statement, though the param name might not always
-          work as an Upshift statement yet
+        - Name, param and value all may be any literal or nested Upshift
+          statement, though the param (its name, not its value) might not
+          always work as an Upshift statement yet
+
+    ^ ^metaname; param val ;
+        - Remember that "^^" represents a single literal "^", so a space is
+          required between the two "^"s to start the name of an insertion call
+          with another Upshift sequence.
+
+    ^ ^metaname; ;
+        - Also remember to close both inner and outer nested escapes with their
+          own separate ";"s.
 
 Conditionals:
 
     ^?name bar;
         - Inserts bar if the symbol "name"'s value is not ''
-        - Name must be a bare literal as in insertion (described previously)
+        - Name is any literal or escape as in insertion (described previously)
 
     ^?name foo bar;
         - Inserts bar if the symbol "name"'s value is "foo"
@@ -123,8 +132,7 @@ Upshift Literals (inside ^ statements, above):
     supported:
 
     foo
-        - Bare unquoted literal
-        - Required form in certain places like the name in an insertion call
+        - Bare unquoted literal, maximal berevity
         - All letters and numbers are allowed as well as . / \ - and _
 
     'foo' (or "foo")
@@ -136,14 +144,12 @@ Upshift Literals (inside ^ statements, above):
           don't indicate any special processing or interpolation as in some
           other languages like Perl; use upquotes (below) for that
 
-    ^'foo^' (or ^"foo^")
+    ^(foo^)
         - Inserts a subdefinition in the same format as a standalone template
         - We call this "upquoted"
         - Same escaping rules as the mainline/top level of the template
-        - As with normal quotes (above), single and double quotes are
-          semantically identical
 
-    'foo: '^foo; (or any other combination)
+    "key: "^value; (or any other combination)
         - All literal forms and escapes may be joined/concatenated by omitting
           the otherwise-required whitespace in between them
         - We call this a "compound literal"

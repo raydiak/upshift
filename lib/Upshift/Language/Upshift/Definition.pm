@@ -53,13 +53,14 @@ class Upshift::Language::Upshift::Definition::Call {
 
     multi method to-string (&lookup) {
         my &new-lookup = %.params ??
-            -> $_ {
+            -> $_ is copy {
+                $_ .= to-string: &lookup unless $_ ~~ Str;
                 %.params{$_}:exists ??
                     %.params{$_} !!
                     lookup $_
             } !!
             &lookup;
-        my $part = lookup $.name;
+        my $part = new-lookup $.name;
         unless defined $part {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';

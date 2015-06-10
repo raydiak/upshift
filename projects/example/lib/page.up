@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-        <title>Example^?title ^' - ^title;^';</title>
+        <title>Example^?title ^( - ^title;^);</title>
         <style type="text/css">
             body {
                 background: #0F0F0F;
@@ -20,7 +20,7 @@
         ^head;
     </head>
     <body>
-        ^?heading ^'<h1>^heading;</h1>^';
+        ^?heading ^(<h1>^heading;</h1>^);
         ^body;
     </body>
 </html>

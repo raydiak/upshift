@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd "$DIR"
-upshift .
+../../bin/upshift .
 
 if [ $? -eq 0 ]; then
     diff -u ../../README gen/README

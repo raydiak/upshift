@@ -45,7 +45,7 @@ $def = Upshift::Language::Upshift.from-string:
         Superman "It's a bird!  It's a plane!" !
         'Admiral Ackbar' "It's a trap!" !
         ^?name
-            ^"It's a ... ^name;?^" !
+            ^(It's a ... ^name;?^) !
             'What is that?};
 isa-ok $def, Upshift::Language::Upshift::Definition,
     'Parse if-elsif-else, nesting, upquote, and implied terminators';
@@ -59,7 +59,7 @@ is $def.to-string, 'What is that?', 'Output else/false conditional';
 
 my $echo = Upshift::Language::Upshift.from-string: '^msg';
 $def = Upshift::Language::Upshift.from-string:
-    q{^echo msg 'eins '^"zwei ^"^echo msg drei};
+    q{^echo msg 'eins '^(zwei ^)^echo msg drei};
 isa-ok $def, Upshift::Language::Upshift::Definition,
     'Parse compound literal';
 is $def.to-string(:$echo), 'eins zwei drei',

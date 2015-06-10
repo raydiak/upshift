@@ -23,7 +23,7 @@ grammar Upshift::Language::Upshift::Grammar {
         ] <.ws> [ \; || $ ]
     }
     token escape-statement-call {
-        <name=.escape-literal-bare>
+        <name=.escape-literal>
         [ \s+ <param=.escape-literal>* % \s+ ]?
     }
     rule escape-statement-conditional
@@ -35,9 +35,9 @@ grammar Upshift::Language::Upshift::Grammar {
         <escape-statement-conditional-if-true>
     }
     rule escape-statement-conditional-if-true
-        {<name=.escape-literal-bare>\s+ <literal=.escape-literal>}
+        {<name=.escape-literal>\s+ <literal=.escape-literal>}
     rule escape-statement-conditional-if-value
-        {<name=.escape-literal-bare>\s+
+        {<name=.escape-literal>\s+
         <value=.escape-literal>\s+
         <literal=.escape-literal>}
     rule escape-statement-conditional-elsif
@@ -52,7 +52,6 @@ grammar Upshift::Language::Upshift::Grammar {
             <escape-literal-quoted> ||
             <escape-literal-doublequoted> ||
             <escape-literal-upquoted> ||
-            <escape-literal-updoublequoted> ||
             #<escape-literal-symbol> ||
             <escape> #`[[[ TODO
                 making this work everywhere probably includes more ::Definition changes
@@ -83,8 +82,7 @@ grammar Upshift::Language::Upshift::Grammar {
     token escape-literal-doublequoted-literal { <-[\"\^]>+ }
     rule escape-literal-doublequoted-literal-escape {\^ \^}
     rule escape-literal-doublequoted-literal-quote {\^ \"}
-    rule escape-literal-upquoted {\^ \'<TOP>[\^ \'||$]}
-    rule escape-literal-updoublequoted {\^ \"<TOP>[\^ \"||$]}
+    rule escape-literal-upquoted {\^ \(<TOP>[\^ \)||$]}
     #token escape-literal-symbol { \^ <escape-literal-bare> }
 }
 
@@ -136,7 +134,6 @@ class Upshift::Language::Upshift::Actions {
     method escape-literal-doublequoted-literal-escape ($/) { make '^' }
     method escape-literal-doublequoted-literal-quote ($/) { make '"' }
     method escape-literal-upquoted ($/) { make $<TOP>.made }
-    method escape-literal-updoublequoted ($/) { make $<TOP>.made }
     #`[[[
     method escape-literal-symbol ($/) {
         make Upshift::Language::Upshift::Definition::Call.new:

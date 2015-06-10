@@ -11,7 +11,7 @@
         </style>
     '
     heading Welcome
-    body ^'
+    body ^(
         ^subhead heading 'Hello, there';
         ^image;
         Well, that's all for now. I hope you enjoyed the example!

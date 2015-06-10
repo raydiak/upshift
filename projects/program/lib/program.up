@@ -1,0 +1,18 @@
+^ ^lang;/program.up
+    varX ^ ^lang;/var.up name x ;
+    varY ^ ^lang;/var.up name y ;
+    body ^(
+        ^ ^lang;/loop.up
+            var ^varY;
+            till ^?height ^height; ! 30;
+            body ^ ^lang;/loop.up
+                var ^varX;
+                till ^?width ^width; ! 40;
+                body ^(
+                    ^ ^lang;/say.up expr ^varX; ;
+                    ^ ^lang;/say.up expr ^varY; ;
+                ^)
+            ;
+        ;
+    ^)
+;

@@ -1,0 +1,3 @@
+for ^?from ^from; ! 0;..^?to ^to; ! ^?till '^^'^till;;; ^?var ' -> '^var;; {
+    ^body;
+}

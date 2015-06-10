@@ -1,0 +1,3 @@
+^?var
+    ^var; !
+    ^lua/var.up name up_lua_loop_var

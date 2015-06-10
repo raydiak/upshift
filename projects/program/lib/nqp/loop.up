@@ -1,0 +1,7 @@
+{
+    my ^nqp/loop-var.up; := ^?from ^from; ! 0;;
+    while ^nqp/loop-var.up; <^?to '= '^to; ! ^?till ' '^till;;; {
+        ^body;
+        ^nqp/loop-var.up;++;
+    }
+}

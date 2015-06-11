@@ -19,12 +19,16 @@ grammar Upshift::Language::Upshift::Grammar {
     token escape-statement {
         \^ <.ws> [
             <escape-statement-conditional> ||
-            <escape-statement-call>
+            <escape-statement-call> ||
+            <escape-statement-subcall>
         ] <.ws> [ \; || $ ]
     }
     token escape-statement-call {
         <name=.escape-literal>
         [ \s+ <param=.escape-literal>* % \s+ ]?
+    }
+    token escape-statement-subcall {
+        \= <.ws> <escape-literal>+ % \s+
     }
     rule escape-statement-conditional
         {\? <escape-statement-conditional-if>
@@ -103,6 +107,11 @@ class Upshift::Language::Upshift::Actions {
             $<name>.made,
             @($<param>».made)
         )
+    }
+    method escape-statement-subcall ($/) {
+        make Upshift::Language::Upshift::Definition::Call.new:
+            :subcall,
+            children => @<escape-literal>».made
     }
     method escape-statement-conditional ($/) {
         my $if = $<escape-statement-conditional-if>.values[0];

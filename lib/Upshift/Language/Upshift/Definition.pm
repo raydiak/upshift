@@ -40,9 +40,13 @@ class Upshift::Language::Upshift::Definition {
 class Upshift::Language::Upshift::Definition::Call {
     also is Upshift::Language::Upshift::Definition;
 
-    has $.name = self.children[0];
-    has %.params = self.children > 1 ??
-        self.children[1..*] !! ();
+    has $.subcall = False;
+    has $.invocant = self.subcall ??
+        self.children[*-1] !! self.children[0];
+    has %.params = self.children < 2 ?? () !!
+        self.subcall ??
+            self.children[0..*-2] !!
+            self.children[1..*-1];
 
     #`[[[
     submethod BUILD (:$!name, :%!params) {
@@ -51,16 +55,20 @@ class Upshift::Language::Upshift::Definition::Call {
     }
     ]]]
 
-    multi method to-string (&lookup) {
-        my &new-lookup = %.params ??
+    method build-lookup (&lookup) {
+        %.params ??
             -> $_ is copy {
                 $_ .= to-string: &lookup unless $_ ~~ Str;
                 %.params{$_}:exists ??
                     %.params{$_} !!
                     lookup $_
             } !!
-            &lookup;
-        my $part = new-lookup $.name;
+            &lookup
+    }
+
+    multi method to-string (&lookup) {
+        my &new-lookup = self.build-lookup: &lookup;
+        my $part = $.subcall ?? $.invocant !! new-lookup $.invocant;
         unless defined $part {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';

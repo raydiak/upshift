@@ -1,7 +1,7 @@
 use v6;
 
 use Test;
-plan 22;
+plan 24;
 
 use lib $?FILE.IO.parent.parent.child: 'lib';
 use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
@@ -64,5 +64,12 @@ isa-ok $def, Upshift::Language::Upshift::Definition,
     'Parse compound literal';
 is $def.to-string(:$echo), 'eins zwei drei',
     'Output compound literal';
+
+$def = Upshift::Language::Upshift.from-string:
+    q{^= name Vader title Darth ^(^title; ^name};
+isa-ok $def, Upshift::Language::Upshift::Definition,
+    'Parse subcall';
+is $def.to-string, 'Darth Vader',
+    'Output subcall';
 
 done;

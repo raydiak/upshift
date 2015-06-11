@@ -21,52 +21,11 @@ The syntax is as follows:
   end of the 'body' value, and the ; at the end of the 'page.up' insertion
   which comprises the whole file.
 
-- Names are currently looked up in a rather static way, first as parameters
-  passed in from an insertion call, then from the root of src and lib in that
-  order, stopping at the first defined value it finds. No name mangling is
-  applied, so for example to refer to a template file named
-  "lib/site/nav.html.up" the corresponding name would be "site/nav.html.up".
+Upshift Literals (inside ^ statements):
 
-Insertion of vars/params/templates/files:
-
-    ^name;
-        - Inserts the value of the symbol "name"
-
-    ^name param val;
-        - Inserts the value of the symbol name, passing it a parameter named
-          "param" with the value "val"
-        - Name, param and value all may be any literal or nested Upshift
-          statement, though the param (its name, not its value) might not
-          always work as an Upshift statement yet
-
-    ^ ^metaname; param val ;
-        - Remember that "^^" represents a single literal "^", so a space is
-          required between the two "^"s to start the name of an insertion call
-          with another Upshift sequence.
-
-    ^ ^metaname; ;
-        - Also remember to close both inner and outer nested escapes with their
-          own separate ";"s.
-
-Conditionals:
-
-    ^?name bar;
-        - Inserts bar if the symbol "name"'s value is not ''
-        - Name is any literal or escape as in insertion (described previously)
-
-    ^?name foo bar;
-        - Inserts bar if the symbol "name"'s value is "foo"
-
-    ^?name foo foo ! bar bar ! ^name; ;
-        - If name's value is "foo", insert literal "foo"; else if name is bar,
-          insert "bar", else insert the value of the "name" symbol
-
-Upshift Literals (inside ^ statements, above):
-
-    Any Upshift escape previously mentioned (insertion or conditional) may
-    itself be used as a value within another Upshift sequence. To write an
-    explicit literal string within an Upshift sequence, the following forms are
-    supported:
+To write an explicit string within an Upshift sequence, the following forms are
+supported. In addition, any Upshift escape (described later) may itself be used
+as a value within another Upshift sequence.
 
     foo
         - Bare unquoted literal, maximal berevity
@@ -91,3 +50,64 @@ Upshift Literals (inside ^ statements, above):
           the otherwise-required whitespace in between them
         - We call this a "compound literal"
         - Semantically equivalent to an upquote (above)
+
+Insertion of vars/params/templates/files:
+
+Names are currently looked up in a rather static way, first as parameters
+passed in from an insertion call, then from the root of src and lib in that
+order, stopping at the first defined value it finds. No name mangling is
+applied, so for example to refer to a template file named
+"lib/site/nav.html.up" the corresponding name would be "site/nav.html.up".
+
+    ^name;
+        - Inserts the value of the symbol "name"
+
+    ^name param val;
+        - Inserts the value of the symbol name, passing it a parameter named
+          "param" with the value "val"
+        - Name, param and value all may be any literal or nested Upshift
+          statement, though the param (its name, not its value) might not
+          always work as an Upshift statement yet
+
+    ^ ^metaname; param val ;
+        - Remember that "^^" represents a single literal "^", so a space is
+          required between the two "^"s to start the name of an insertion call
+          with another Upshift sequence
+
+    ^ ^metaname; ;
+        - Also remember to close both inner and outer nested escapes with their
+          own separate ";"s
+
+    ^= param val ^(parameter value: ^param;^);
+        - Calls the last value passed to it as a literal with the given
+          parameters. This stands in contrast to normal symbolic insertion,
+          which calls the first value passed as a symbolic name
+        - Put another way, the parameters come before the invocant, which is
+          treated as the body to insert directly instead of looked up as a name
+        - We call this a "subcall" because it is a call with reduced
+          indirection, and because it effectively allows defining subtemplates
+          with their own parameter scopes within a main template file
+        - The parameters come first for the same reason "=" is chosen as the
+          syntax: the intended use is to define named values for reuse or
+          abbreviation in a larger body, without being forced to put anything
+          into a separate file with a separate name. In this role it is often
+          convenient to use an unclosed upquote, which requires it to come last
+            - In fact this provides a syntax for defining names within the
+              scope of the current file just by starting the template with a
+              line like "^= param val ^(" and forgetting that the rest of the
+              file is in a nested call at all
+        - There is ordinarily no semantic point in subcalling a constant
+          literal string which takes no parameters, but it is allowed
+
+Conditionals:
+
+    ^?name bar;
+        - Inserts bar if the symbol "name"'s value is not ''
+        - Name is any literal or escape as in insertion (described previously)
+
+    ^?name foo bar;
+        - Inserts bar if the symbol "name"'s value is "foo"
+
+    ^?name foo foo ! bar bar ! ^name; ;
+        - If name's value is "foo", insert literal "foo"; else if name is bar,
+          insert "bar", else insert the value of the "name" symbol

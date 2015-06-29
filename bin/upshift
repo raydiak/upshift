@@ -5,12 +5,16 @@ use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
 
 use Upshift;
 
-sub MAIN (Str $project, Str $destination?, Bool :$force = False) {
+multi sub MAIN (Str $project, Str $destination?, Bool :$force = False) {
     if $destination.defined {
         Upshift::build $project, $destination, :$force;
     } else {
         Upshift::build $project, :$force;
     }
+}
+
+multi sub MAIN ($template, Bool:D :$e!, *%params) {
+    say Upshift::Language::Upshift.from-string($template).to-string: %params;
 }
 
 # vim: ft=perl6

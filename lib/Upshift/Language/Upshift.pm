@@ -35,8 +35,10 @@ grammar Upshift::Language::Upshift::Grammar {
         <escape-statement-conditional-elsif>*
         <escape-statement-conditional-else>?}
     token escape-statement-conditional-if {
-        <escape-statement-conditional-if-value> ||
-        <escape-statement-conditional-if-true>
+        <not=.escape-statement-conditional-not>? <.ws> [
+            <escape-statement-conditional-if-value> ||
+            <escape-statement-conditional-if-true>
+        ]
     }
     rule escape-statement-conditional-if-true
         {<name=.escape-literal>\s+ <literal=.escape-literal>}
@@ -46,9 +48,11 @@ grammar Upshift::Language::Upshift::Grammar {
         <literal=.escape-literal>}
     rule escape-statement-conditional-elsif
         {\!
+        <not=.escape-statement-conditional-not>?
         <value=.escape-literal>
         <literal=.escape-literal>}
     rule escape-statement-conditional-else {\! <literal=.escape-literal>}
+    token escape-statement-conditional-not { \! }
     
     token escape-literal {
         (
@@ -91,8 +95,6 @@ grammar Upshift::Language::Upshift::Grammar {
 }
 
 class Upshift::Language::Upshift::Actions {
-    has @.cond-names;
-
     method TOP ($/) {
         make Upshift::Language::Upshift::Definition.new:
             :children($0».values».made)
@@ -114,13 +116,17 @@ class Upshift::Language::Upshift::Actions {
             children => @<escape-literal>».made
     }
     method escape-statement-conditional ($/) {
-        my $if = $<escape-statement-conditional-if>.values[0];
+        my $if = $<escape-statement-conditional-if>.pairs.first({.key ne 'not'}).value;
         my @children = 
             $if<name>.made,
-            $if<value>.?made // * ne '',
+            $<escape-statement-conditional-if><not> ??
+                ( $if<value>.made.defined ?? * ne $if<value>.made !! '') !!
+                $if<value>.?made // * ne '',
             $if<literal>.made,
             @<escape-statement-conditional-elsif>.map({
-                .<value>.?made // * ne '',
+                .<not> ??
+                    ( .<value>.made.defined ?? * ne .<value>.made !! '') !!
+                    .<value>.?made // * ne '',
                 .<literal>.made
             }),
             $<escape-statement-conditional-else><literal>.?made // ();

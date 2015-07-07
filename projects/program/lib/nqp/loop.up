@@ -1,7 +1,17 @@
+^=
+    *var ^nqp/var.up name up-nqp-loop-var;
+    *from '' *to '' *till '' *body ''
+^(
 {
-    my ^nqp/loop-var.up; := ^?from ^from; ! 0;;
-    while ^nqp/loop-var.up; <^?to '= '^to; ! ^?till ' '^till;;; {
-        ^body;
-        ^nqp/loop-var.up;++;
+    my ^var; := ^?from ^from; ! 0;;
+    while ^var; <^
+        ?to
+            '= '^to; !
+            ^?till
+                ' '^till;
+            ;
+    ; {
+        ^body var ^var;;
+        ^var;++;
     }
 }

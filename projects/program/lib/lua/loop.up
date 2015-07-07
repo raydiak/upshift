@@ -1,3 +1,4 @@
-for ^lua/loop-var.up; = ^?from ^from; ! 0;, ^?to ^to; ! ^?till ^till;'-1';; do
+^= *var '' *from '' *to '' *till '' *body '' ^(
+for ^lua/loop-var.up var ^var; ; = ^?from ^from; ! 0;, ^?to ^to; ! ^?till ^till;'-1';; do
     ^body;
 end

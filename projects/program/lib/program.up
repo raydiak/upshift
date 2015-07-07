@@ -1,6 +1,8 @@
-^ ^lang;/program.up
+^=
     varX ^ ^lang;/var.up name x ;
     varY ^ ^lang;/var.up name y ;
+^(
+^ ^lang;/program.up
     body ^(
         ^ ^lang;/loop.up
             var ^varY;

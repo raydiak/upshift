@@ -1,4 +1,5 @@
 class Upshift::Language::Upshift::Definition {
+    has $.root is rw;
     has @.children;
 
     method gist {
@@ -6,21 +7,20 @@ class Upshift::Language::Upshift::Definition {
         @.children.map( "\n" ~ *.gist.indent: 4 ).join
     }
 
-    multi method to-string (*%lookup) {
-        %lookup ??
-            self.to-string: %lookup !!
-            self.to-string: -> $ {}
+    multi method to-string (*%lookup, |args) {
+        self.to-string: %lookup, |args
     }
-    multi method to-string (%lookup) {
+    multi method to-string (%lookup, |args) {
         %lookup ??
-            self.to-string: -> $name { %lookup{$name} } !!
-            self.to-string: -> $ {}
+            self.to-string: -> $_ { %lookup{$_} }, |args !!
+            self.to-string: -> $ {}, |args;
     }
-    multi method to-string (&lookup) {
+    multi method to-string (&lookup, :&root is copy, |args) {
         when !@.children { '' }
 
+        &root = &lookup if $.root;
         my @new;
-        for @.children.map({ self.part-to-string: $_, &lookup }) {
+        for @.children.map({ self.part-to-string: $_, &lookup, :&root, |args }) {
             if $_ ~~ Str && @new && @new[*-1] ~~ Str {
                 @new[*-1] ~= $_;
             } else {
@@ -34,7 +34,8 @@ class Upshift::Language::Upshift::Definition {
     }
 
     multi method part-to-string (::?CLASS $p, |args) { $p.to-string: |args }
-    multi method part-to-string ($p, |) { $p.Str }
+    multi method part-to-string (Str(Cool) $p, |) { $p }
+    multi method part-to-string ($p, |) { $p }
 }
 
 class Upshift::Language::Upshift::Definition::Call {
@@ -43,10 +44,12 @@ class Upshift::Language::Upshift::Definition::Call {
     has $.subcall = False;
     has $.invocant = self.subcall ??
         self.children[*-1] !! self.children[0];
-    has %.params = self.children < 2 ?? () !!
+    has %.params{Any} = self.children < 2 ?? () !!
         self.subcall ??
             self.children[0..*-2] !!
             self.children[1..*-1];
+    has %.direct{Any};
+    has %.defer{Any};
 
     #`[[[
     submethod BUILD (:$!name, :%!params) {
@@ -55,25 +58,79 @@ class Upshift::Language::Upshift::Definition::Call {
     }
     ]]]
 
-    method build-lookup (&lookup) {
-        %.params ??
-            -> $_ is copy {
-                $_ .= to-string: &lookup unless $_ ~~ Str;
-                %.params{$_}:exists ??
-                    %.params{$_} !!
-                    lookup $_
-            } !!
-            &lookup
+    method !build-lookup (&lookup, :&root is copy, |args) {
+        if %.params {
+            my %defer = %.defer.map: -> $_ {
+                self.part-to-string(.key, &lookup, :&root, |args) => .value
+            } if %.defer;
+            my %params = %defer ??
+                %.params.map: -> $_ {
+                    my $key = self.part-to-string(.key, &lookup, :&root, |args);
+                    $key => ( %defer{$key}:exists ??
+                        %defer{$key} !!
+                        self.part-to-string(.value, &lookup, :&root, |args)
+                    );
+                } !!
+                %.params.map: -> $_ {
+                    self.part-to-string(.key, &lookup, :&root, |args) =>
+                    self.part-to-string(.value, &lookup, :&root, |args)
+                };
+
+            if %.direct {
+                my %direct = %defer ??
+                    %.direct.map: -> $_ {
+                        my $key = self.part-to-string(.key, &lookup, :&root, |args);
+                        $key => ( %defer{$key}:exists ??
+                            %defer{$key} !!
+                            self.part-to-string(.value, &lookup, :&root, |args)
+                        );
+                    } !!
+                    %.direct.map: -> $_ {
+                        self.part-to-string(.key, &lookup, :&root, |args) =>
+                        self.part-to-string(.value, &lookup, :&root, |args)
+                    };
+                my &inner-root = &root ??
+                    -> $_ is copy {
+                        $_ .= to-string: &lookup, :&root, |args unless $_ ~~ Str;
+                        root($_) // %direct{$_};
+                    } !!
+                    -> $_ is copy {
+                        $_ .= to-string: &lookup, :&root, |args unless $_ ~~ Str;
+                        %direct{$_};
+                    };
+                -> $_ is copy {
+                    $_ .= to-string: &lookup, :&root, |args unless $_ ~~ Str;
+                    if %direct{$_}:exists {
+                        inner-root $_;
+                    } else {
+                        %params{$_} // lookup $_;
+                    }
+                }
+            } else {
+                -> $_ is copy {
+                    $_ .= to-string: &lookup, :&root, |args unless $_ ~~ Str;
+                    %params{$_} // lookup $_;
+                };
+            }
+        } else {
+            &lookup;
+        }
     }
 
-    multi method to-string (&lookup) {
-        my &new-lookup = self.build-lookup: &lookup;
-        my $part = $.subcall ?? $.invocant !! new-lookup $.invocant;
+    multi method to-string (&lookup, |args) {
+        my $part = $.subcall ?? $.invocant !!
+            lookup self.part-to-string: $.invocant, &lookup, |args;
+            #lookup $.invocant;
         unless defined $part {
             #note " * Assuming empty string for undefined name '$.name'";
             $part = '';
         }
-        self.part-to-string: $part, &new-lookup;
+        return ~$part if $part ~~ Cool;
+
+        self.part-to-string:
+            $part,
+            self!build-lookup(&lookup, |args),
+            |args;
     }
 }
 
@@ -90,17 +147,19 @@ class Upshift::Language::Upshift::Definition::Conditional {
     }
     ]]]
 
-    multi method to-string (&lookup) {
+    multi method to-string (&lookup, |args) {
         my $cond-val = lookup @.children[0];
         unless defined $cond-val {
             #note " * Assuming empty string for undefined name '@.children[0]'";
             $cond-val = '';
         }
-        $cond-val = self.part-to-string: $cond-val, &lookup;
+        $cond-val = self.part-to-string: $cond-val, &lookup, |args;
 
-        my $i = @.conditions.first: -> $i { $cond-val ~~ @.children[$i] };
-        when $i.defined { self.part-to-string: @.children[$i+1], &lookup }
-        when ?$.has-else { self.part-to-string: @.children[*-1], &lookup }
+        my $i = @.conditions.first: -> $i {
+            $cond-val ~~ self.part-to-string: @.children[$i], &lookup, |args
+        };
+        when $i.defined { self.part-to-string: @.children[$i+1], &lookup, |args }
+        when ?$.has-else { self.part-to-string: @.children[*-1], &lookup, |args }
         '';
     }
 }

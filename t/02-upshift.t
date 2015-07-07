@@ -1,7 +1,7 @@
 use v6;
 
 use Test;
-plan 24;
+plan 29;
 
 use lib $?FILE.IO.parent.parent.child: 'lib';
 use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
@@ -71,5 +71,21 @@ isa-ok $def, Upshift::Language::Upshift::Definition,
     'Parse subcall';
 is $def.to-string, 'Darth Vader',
     'Output subcall';
+
+$def = Upshift::Language::Upshift.from-string:
+    q{^= foo bar ^= *foo baz ^foo};
+isa-ok $def, Upshift::Language::Upshift::Definition,
+    'Parse subcall with direct parameter';
+is $def.to-string, 'baz',
+    'Output direct parameter default';
+is $def.to-string(:foo<foo>), 'foo',
+    'Output passed direct parameter';
+
+$def = Upshift::Language::Upshift.from-string:
+    q{^= \template ^body; ^template body 'Hi There};
+isa-ok $def, Upshift::Language::Upshift::Definition,
+    'Parse deferred parameter';
+is $def.to-string, 'Hi There',
+    'Output deferred parameter';
 
 done;

@@ -109,7 +109,7 @@ class Upshift::Language::Upshift::Actions {
     }
     method uptop ($/) {
         make Upshift::Language::Upshift::Definition.new:
-            :children($0».values».made)
+            :children(@0».values.flat».made)
     }
     method literal ($/) { make join '', $0».values».made }
     method literal-normal ($/) { make ~$/ }
@@ -119,29 +119,29 @@ class Upshift::Language::Upshift::Actions {
     method escape-statement-call ($/) {
         my @decls := @<escape-statement-call-declaration>;
         make Upshift::Language::Upshift::Definition::Call.new:
-            :children(
+            children => flat(
                 $<name>.made,
-                @decls».made,
+                @decls».made.Slip
             ),
-            defer => @decls.grep(*.<defer>.Bool)».made;
+            defer => @decls.grep(*.<defer>.Bool)».made.flat;
     }
     method escape-statement-subcall ($/) {
         my @decls := @<escape-statement-call-declaration>;
         make Upshift::Language::Upshift::Definition::Call.new:
             :subcall,
-            children => (
-                @decls».made,
+            children => flat(
+                @decls».made.Slip,
                 $<body>.made
             ),
-            direct => @decls.grep(*.<direct>.Bool)».made,
-            defer => @decls.grep(*.<defer>.Bool)».made;
+            direct => @decls.grep(*.<direct>.Bool)».made.flat,
+            defer => @decls.grep(*.<defer>.Bool)».made.flat;
     }
     method escape-statement-call-declaration ($/) {
         make @($<name>.made, $<value>.made)
     }
     method escape-statement-conditional ($/) {
         my $if = $<escape-statement-conditional-if>.pairs.first({.key ne 'not'}).value;
-        my @children = 
+        my @children = flat(
             $if<name>.made,
             $<escape-statement-conditional-if><not> ??
                 ( $if<value>.made.defined ?? * ne $if<value>.made !! '') !!
@@ -153,7 +153,8 @@ class Upshift::Language::Upshift::Actions {
                     .<value>.?made // * ne '',
                 .<literal>.made
             }),
-            $<escape-statement-conditional-else><literal>.?made // ();
+            $<escape-statement-conditional-else><literal>.?made // ()
+        );
         
         make Upshift::Language::Upshift::Definition::Conditional.new: :@children;
     }

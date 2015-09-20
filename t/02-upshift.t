@@ -87,5 +87,3 @@ isa-ok $def, Upshift::Language::Upshift::Definition,
     'Parse deferred parameter';
 is $def.to-string, 'Hi There',
     'Output deferred parameter';
-
-done;

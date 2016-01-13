@@ -12,6 +12,6 @@
     '
     heading Welcome
     body ^(
-        ^subhead heading 'Hello, there';
+        ^subhead.up heading 'Hello, there';
         ^image;
         Well, that's all for now. I hope you enjoyed the example!

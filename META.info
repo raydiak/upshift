@@ -8,9 +8,11 @@
     "depends"       : [ "File::Find", "Shell::Command" ],
     "provides"      : {
         "Upshift"                       : "lib/Upshift.pm",
-        "Upshift::Definition"           : "lib/Upshift/Definition.pm",
         "Upshift::Language"             : "lib/Upshift/Language.pm",
+        "Upshift::Language::Text"       : "lib/Upshift/Language/Text.pm",
         "Upshift::Language::Upshift"    : "lib/Upshift/Language/Upshift.pm",
+        "Upshift::Language::Upshift::Definition":
+            "lib/Upshift/Language/Upshift/Definition.pm",
         "Upshift::Project"              : "lib/Upshift/Project.pm"
     },
     "source-url"    : "git://github.com/raydiak/upshift.git"

@@ -3,8 +3,8 @@ use v6;
 use Test;
 plan 29;
 
-use lib $?FILE.IO.parent.parent.child: 'lib';
-use lib $?FILE.IO.parent.parent.child('blib').child: 'lib';
+use lib $?FILE.IO.parent.parent.child('lib').Str;
+use lib $?FILE.IO.parent.parent.child('blib').child('lib').Str;
 
 use Upshift::Language::Upshift;
 

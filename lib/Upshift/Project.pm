@@ -7,20 +7,19 @@ use Upshift::Language::Upshift;
 use Upshift::Language::Text;
 
 # project root
-has IO::Path $.path = die 'path is required';
+has IO::Path $.path is required;
 
 # destination for generated output
 has IO::Path $.gen-path = $!path.child: 'gen';
 
 # source files to process into gen
 has IO::Path $.src-path = $!path.child: 'src';
-has IO::Path @.src-files =
-    find(dir => $!src-path)».relative($!src-path)».IO.sort;
+has @.src-files = find(dir => $!src-path)».relative($!src-path)».IO.sort;
 
 # files for use but not outputted into gen
 has IO::Path $.lib-path = $!path.child: 'lib';
-has IO::Path @.lib-files = $!lib-path.e ??
-    find(dir => $!lib-path)».relative($!lib-path)».IO !! ();
+has @.lib-files = $!lib-path.e ??
+    find(dir => $!lib-path)».relative($!lib-path)».IO.flat !! [];
 
 has %!langs =
     up  => Upshift::Language::Upshift,

@@ -1,3 +1,8 @@
+WARNING! This is a very experimental project, has never been submitted to any
+ecosystem, is unmaintained and largely served to prove to myself that I have
+a lot to learn about language design. Don't expect it to work, and definitely
+don't use it for anything important.
+
 Upshift is an experimental templating system in Perl 6. Some of the goals in
 mind surrounding the existing work to varying degrees are:
 
